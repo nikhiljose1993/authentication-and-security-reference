@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 const app = express();
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -11,11 +12,15 @@ app.use(
   })
 );
 mongoose.connect("mongodb://127.0.0.1:27017/userDB");
-
-const userSchema = {
+// mongoose class schema for encryption purpose
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
+// add the plugin to the schema before creating new mongoose model.
+const secret = "Thisisourlittlesecret";
+//you can specify the fields you want to encrypt.
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
 
 const User = new mongoose.model("User", userSchema);
 
@@ -63,5 +68,5 @@ app.post("/login", (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log("server started on port 3000");
+  console.log("Server started on port 3000");
 });
